@@ -1,7 +1,10 @@
 library(dash)
+library(dashCoreComponents)
 library(dashHtmlComponents)
+library(dashBootstrapComponents)
 library(plotly)
 library(tidyverse)
+library(purrr)
 
 # Import data
 clean_data <- read_csv("data/clean_data.csv")
@@ -51,10 +54,73 @@ country_iso[country_iso$country == "Gambia, The", "country"] <- "Gambia"
 
 disease_count_map_data <- disease_count_data %>% left_join(country_iso, by = "country")
   
-  
-# app = Dash$new()
-# app$layout(htmlDiv("I am alive!"))
-# app$run_server(debug = TRUE)
+app <- Dash$new(external_stylesheets = dbcThemes$BOOTSTRAP)
+
+year_controller = htmlDiv(
+  list(
+    "Year",
+    dccSlider(
+      id="year_widget",
+      min = 1990,
+      max = 2015,
+      marks= list(
+        "1990" = "1990",
+        "1995" = "1995",
+        "2000" = "2000",
+        "2005" = "2005",
+        "2010" = "2010",
+        "2015" = "2015"
+      ),
+      value = 2005,
+      included=FALSE,
+    )
+  )
+)
+
+country_controller = htmlDiv(
+  list(
+    "Country",
+    dccDropdown(
+      id="country_widget",
+      value=country_list,
+      placeholder="Select a country...",
+      options = country_list %>%  purrr::map(function(country) list(label = country, value = country)),
+      multi=TRUE,
+      style=list("overflowY"="scroll", "height"="100px")
+    )
+  )
+)
+
+disease_controller = htmlDiv(
+  list(
+    "Disease",
+    dccDropdown(
+      id="disease_widget",
+      value=disease_list,
+      placeholder="Select a disease...",
+      options= disease_list %>% purrr::map(function(disease) list(label = disease, value = disease)),
+      multi=TRUE,
+      style=list("overflowY"="scroll", "height"="100px")
+    )
+  )
+)
+
+app$layout(
+  dbcContainer(
+    list(
+      dbcRow(
+        list(
+          dbcCol(country_controller),
+          dbcCol(year_controller),
+          dbcCol(disease_controller)
+        )
+      )
+    ), style = list('max-width' = '100%')
+  )
+)  
+
+app$run_server(debug = T)
+
 # 
 # fig <- plot_ly(clean_data, type='choropleth', locations=df$CODE, z=df$GDP..BILLIONS., text=df$COUNTRY, colorscale="Blues")
 # 
