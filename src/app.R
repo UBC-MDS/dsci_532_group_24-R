@@ -7,7 +7,7 @@ library(tidyverse)
 clean_data <- read_csv("data/clean_data.csv")
 clean_data <- clean_data %>% select(-X1)
 country_list <- clean_data$country %>% unique()
-disease_list = c("HIV",
+disease_list <- c("HIV",
                  "Malaria",
                  "Measles",
                  "Meningitis",
@@ -51,11 +51,11 @@ country_iso[country_iso$country == "Gambia, The", "country"] <- "Gambia"
 
 disease_count_map_data <- disease_count_data %>% left_join(country_iso, by = "country")
   
-  
-# app = Dash$new()
-# app$layout(htmlDiv("I am alive!"))
-# app$run_server(debug = TRUE)
-# 
-# fig <- plot_ly(clean_data, type='choropleth', locations=df$CODE, z=df$GDP..BILLIONS., text=df$COUNTRY, colorscale="Blues")
-# 
-# #fig
+
+app = Dash$new()
+app$layout(htmlDiv("I am alive!"))
+app$run_server(debug = TRUE)
+
+fig <- plot_ly(disease_count_map_data, type='choropleth', locations=disease_count_map_data$iso_alpha, z=disease_count_map_data$count, text=disease_count_map_data$country, colorscale="Blues")
+
+fig
