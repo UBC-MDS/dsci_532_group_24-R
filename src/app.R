@@ -110,26 +110,65 @@ disease_controller = htmlDiv(list(
 ))
 
 # Define information tab
-## TODO
+row1 <-
+  htmlTr(list(
+    htmlTd("The total number of children dying before age 5"),
+    htmlTd(
+      htmlA("World Health Organization", href = "https://www.who.int/data/maternal-newborn-child-adolescent-ageing/child-data")
+    )
+  ))
+row2 <-
+  htmlTr(list(
+    htmlTd(
+      "HIV, malaria, measles, meningitis and NCD (non-communicable disease) deaths in children 1-59 months"
+    ),
+    htmlTd(
+      htmlA("World Health Organization", href = "https://www.who.int/data/maternal-newborn-child-adolescent-ageing/child-data")
+    )
+  ))
+row3 <-
+  htmlTr(list(htmlTd("Total Population by country"), htmlTd(
+    htmlA(
+      "The United Nations, 2019 Revision of World Population Prospects",
+      href = "https://population.un.org/wpp/"
+    )
+  )))
+table_body <- list(htmlTbody(list(row1, row2, row3)))
+
+information_tab <- list(
+  htmlP(
+    "
+    This app is developed as part of DSCI 532's coursework. We intend to provide information to staff and volunteers at an international charity whose work focuses on healthcare and medication to children in Africa.
+    The underlying dataset of this app is obtained from Gapminder, an independent Swedish foundation, with a mission to fight misconceptions and promotes a fact-based worldview.
+    The table below summarizes the key data sources used in the app.
+    "
+  ),
+  dbcTable(
+    children = list(htmlThead(htmlTr(
+      list(htmlTh("Variable"), htmlTh("Source"))
+    )), htmlTbody(list(row1, row2, row3))),
+    bordered = TRUE
+  )
+)
 
 # Define app
 app <- Dash$new(external_stylesheets = dbcThemes$BOOTSTRAP)
 
-app$layout(dbcContainer(list(
-  htmlH1("Causes of Child Mortality in Africa, 1990 - 2015"),
-  htmlP("App Developed by Junghoo Kim, Mark Wang and Zhenrui (Eric) Yu"),
-  dbcCol(list(dbcRow(
-    list(
-      dbcCol(country_controller),
-      dbcCol(year_controller),
-      dbcCol(disease_controller)
-    )
-  ),
-  dbcRow(
-    list(
-      dbcCol(
-        list("Top Countries by Number of Deaths",
-             dccGraph(
+app$layout(dbcContainer(list(dbcTabs(list(
+  dbcTab(list(
+    htmlH1("Causes of Child Mortality in Africa, 1990 - 2015"),
+    htmlP("App Developed by Junghoo Kim, Mark Wang and Zhenrui (Eric) Yu"),
+    dbcCol(list(dbcRow(
+      list(
+        dbcCol(country_controller),
+        dbcCol(year_controller),
+        dbcCol(disease_controller)
+      )
+    ),
+    dbcRow(
+      list(dbcCol(
+        list("Top Countries (Default Five) by Number of Deaths",
+            dccGraph(
                id = "country_chart",
                style = list(
                  "border-width" = "0",
@@ -137,31 +176,33 @@ app$layout(dbcContainer(list(
                  "height" = "50vh"
                  )
                )
-             )
+            )
       ),
       dbcCol(list(
         dccGraph(
-        id = "map",
-        style = list(
-          "border-width" = "0",
-          "width" = "100%",
-          "height" = "50vh"
+          id = "map",
+          style = list(
+            "border-width" = "0",
+            "width" = "100%",
+            "height" = "50vh"
+          )
+        )
+      )),
+      dbcCol(list(
+        "Diseases by Number of Deaths",
+        dccGraph(
+          id = "disease_chart",
+          style = list(
+            "border-width" = "0",
+            "width" = "100%",
+            "height" = "50vh"
         )
       )
-    )),
-    dbcCol(list(
-      "Diseases by Number of Deaths",
-      dccGraph(
-        id = "disease_chart",
-        style = list(
-          "border-width" = "0",
-          "width" = "100%",
-          "height" = "50vh"
-        )
-      )
+      )))
     )))
-  )))
-), style = list('max-width' = '100%')))
+  ), label = "Visualization"),
+  dbcTab(information_tab, label="Data Source and Explanation")
+))), style = list('max-width' = '100%')))
 
 app$callback(list(output("country_chart", "figure")),
              list(
