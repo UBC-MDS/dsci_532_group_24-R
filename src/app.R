@@ -11,10 +11,10 @@ clean_data <- read_csv("data/clean_data.csv")
 clean_data <- clean_data %>% select(-X1)
 country_list <- clean_data$country %>% unique()
 disease_list <- c("HIV",
-                 "Malaria",
-                 "Measles",
-                 "Meningitis",
-                 "NCD")
+                  "Malaria",
+                  "Measles",
+                  "Meningitis",
+                  "NCD")
 
 ## Define new dataset to present disease
 disease_count_data <- clean_data %>% select(
@@ -36,103 +36,141 @@ colnames(disease_count_data) <- c("country",
                                   "Meningitis",
                                   "NCD")
 disease_count_data <- disease_count_data %>%
-  pivot_longer(cols = disease_list, names_to = "disease", values_to = "count")
+  pivot_longer(cols = disease_list,
+               names_to = "disease",
+               values_to = "count")
 
 ## Define map data
-country_iso <- read_csv("https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv")
+country_iso <-
+  read_csv(
+    "https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv"
+  )
 country_iso <- country_iso %>% select(COUNTRY, CODE)
 colnames(country_iso) <- c("country", "iso_alpha")
 
 ## Add South Sudan and Seychelles
-country_iso <- country_iso %>% add_row(country = "South Sudan", iso_alpha = "SSD") %>% add_row(country = "Seychelles", iso_alpha = "SYC") 
+country_iso <-
+  country_iso %>% add_row(country = "South Sudan", iso_alpha = "SSD") %>% add_row(country = "Seychelles", iso_alpha = "SYC")
 
 ## Rename the two Congos and Gambia
-country_iso[country_iso$country == "Congo, Democratic Republic of the", "country"] <- "Congo, Dem. Rep."
-country_iso[country_iso$country == "Congo, Republic of the", "country"] <- "Congo, Rep."
-country_iso[country_iso$country == "Gambia, The", "country"] <- "Gambia"
+country_iso[country_iso$country == "Congo, Democratic Republic of the", "country"] <-
+  "Congo, Dem. Rep."
+country_iso[country_iso$country == "Congo, Republic of the", "country"] <-
+  "Congo, Rep."
+country_iso[country_iso$country == "Gambia, The", "country"] <-
+  "Gambia"
 
+disease_count_map_data <-
+  disease_count_data %>% left_join(country_iso, by = "country")
 
-disease_count_map_data <- disease_count_data %>% left_join(country_iso, by = "country")
-  
-<<<<<<< HEAD
+# Define three controllers
+year_controller = htmlDiv(list(
+  "Year",
+  dccSlider(
+    id = "year_widget",
+    min = 1990,
+    max = 2015,
+    marks = list(
+      "1990" = "1990",
+      "1995" = "1995",
+      "2000" = "2000",
+      "2005" = "2005",
+      "2010" = "2010",
+      "2015" = "2015"
+    ),
+    value = 2005,
+    included = FALSE,
+  )
+))
 
-app = Dash$new()
-app$layout(htmlDiv("I am alive!"))
-app$run_server(debug = TRUE)
+country_controller = htmlDiv(list(
+  "Country",
+  dccDropdown(
+    id = "country_widget",
+    value = country_list,
+    placeholder = "Select a country...",
+    options = country_list %>%  purrr::map(function(country)
+      list(label = country, value = country)),
+    multi = TRUE,
+    style = list("overflowY" = "scroll", "height" = "100px")
+  )
+))
 
-fig <- plot_ly(disease_count_map_data, type='choropleth', locations=disease_count_map_data$iso_alpha, z=disease_count_map_data$count, text=disease_count_map_data$country, colorscale="Blues")
+disease_controller = htmlDiv(list(
+  "Disease",
+  dccDropdown(
+    id = "disease_widget",
+    value = disease_list,
+    placeholder = "Select a disease...",
+    options = disease_list %>% purrr::map(function(disease)
+      list(label = disease, value = disease)),
+    multi = TRUE,
+    style = list("overflowY" = "scroll", "height" = "100px")
+  )
+))
 
-fig
-=======
+# Define information tab
+## TODO
+
+# Define app
 app <- Dash$new(external_stylesheets = dbcThemes$BOOTSTRAP)
 
-year_controller = htmlDiv(
-  list(
-    "Year",
-    dccSlider(
-      id="year_widget",
-      min = 1990,
-      max = 2015,
-      marks= list(
-        "1990" = "1990",
-        "1995" = "1995",
-        "2000" = "2000",
-        "2005" = "2005",
-        "2010" = "2010",
-        "2015" = "2015"
-      ),
-      value = 2005,
-      included=FALSE,
-    )
-  )
-)
-
-country_controller = htmlDiv(
-  list(
-    "Country",
-    dccDropdown(
-      id="country_widget",
-      value=country_list,
-      placeholder="Select a country...",
-      options = country_list %>%  purrr::map(function(country) list(label = country, value = country)),
-      multi=TRUE,
-      style=list("overflowY"="scroll", "height"="100px")
-    )
-  )
-)
-
-disease_controller = htmlDiv(
-  list(
-    "Disease",
-    dccDropdown(
-      id="disease_widget",
-      value=disease_list,
-      placeholder="Select a disease...",
-      options= disease_list %>% purrr::map(function(disease) list(label = disease, value = disease)),
-      multi=TRUE,
-      style=list("overflowY"="scroll", "height"="100px")
-    )
-  )
-)
-
-app$layout(
-  dbcContainer(
+app$layout(dbcContainer(list(
+  htmlH1("Causes of Child Mortality in Africa, 1990 - 2015"),
+  htmlP("App Developed by Junghoo Kim, Mark Wang and Zhenrui (Eric) Yu"),
+  dbcCol(list(dbcRow(
     list(
-      dbcRow(
-        list(
-          dbcCol(country_controller),
-          dbcCol(year_controller),
-          dbcCol(disease_controller)
+      dbcCol(country_controller),
+      dbcCol(year_controller),
+      dbcCol(disease_controller)
+    )
+  ),
+  dbcRow(
+    list(dbcCol(
+      list("Top Countries (Default Five) by Number of Deaths")
+    ),
+    dbcCol(list(
+      dccGraph(
+        id = "map",
+        style = list(
+          "border-width" = "0",
+          "width" = "100%",
+          "height" = "50vh"
         )
       )
-    ), style = list('max-width' = '100%')
-  )
-)  
+    )),
+    dbcCol(list(
+      "Diseases by Number of Deaths"
+    )))
+  )))
+), style = list('max-width' = '100%')))
+
+app$callback(list(output("map", "figure")),
+             list(
+               input("year_widget", "value"),
+               input("country_widget", "value"),
+               input("disease_widget", "value")
+             ),
+             function(year_selected, countries, diseases) {
+               data_transformed <-
+                 disease_count_map_data %>% filter((year == year_selected) &
+                                                     (country %in% countries) &
+                                                     (disease %in% diseases)) %>% group_by(country, iso_alpha) %>% summarise(total_deaths = sum(count))
+               fig <- plot_ly(data_transformed)
+               fig <- fig %>% add_trace(
+                 type = 'choropleth',
+                 z = data_transformed$total_deaths,
+                 locations = data_transformed$iso_alpha,
+                 color = data_transformed$total_deaths,
+                 text = data_transformed$country,
+                 colorscale = "RdBu"
+               )
+               fig <- fig %>% colorbar(title = "Total deaths",
+                                       thickness=20,
+                                       lenmode="pixels",
+                                       len=300)
+               fig <- fig %>% layout(geo = list(scope = 'africa'))
+               return(list(fig))
+             })
 
 app$run_server(debug = T)
-
-# 
-# fig <- plot_ly(clean_data, type='choropleth', locations=df$CODE, z=df$GDP..BILLIONS., text=df$COUNTRY, colorscale="Blues")
-# 
-# #fig
->>>>>>> f72b3a4f0ee06544c7011d37f1da3941f3f7b88b
