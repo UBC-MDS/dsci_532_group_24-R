@@ -1,6 +1,6 @@
 # dsci_532_group_24-R
 
-# Help Save African Children!
+# Care for African Kids
 
 ## Welcome!
 
