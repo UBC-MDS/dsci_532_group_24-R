@@ -126,11 +126,21 @@ app$layout(dbcContainer(list(
     )
   ),
   dbcRow(
-    list(dbcCol(
-      list("Top Countries (Default Five) by Number of Deaths")
-    ),
-    dbcCol(list(
-      dccGraph(
+    list(
+      dbcCol(
+        list("Top Countries by Number of Deaths",
+             dccGraph(
+               id = "country_chart",
+               style = list(
+                 "border-width" = "0",
+                 "width" = "100%",
+                 "height" = "50vh"
+                 )
+               )
+             )
+      ),
+      dbcCol(list(
+        dccGraph(
         id = "map",
         style = list(
           "border-width" = "0",
@@ -140,10 +150,73 @@ app$layout(dbcContainer(list(
       )
     )),
     dbcCol(list(
-      "Diseases by Number of Deaths"
+      "Diseases by Number of Deaths",
+      dccGraph(
+        id = "disease_chart",
+        style = list(
+          "border-width" = "0",
+          "width" = "100%",
+          "height" = "50vh"
+        )
+      )
     )))
   )))
 ), style = list('max-width' = '100%')))
+
+app$callback(list(output("country_chart", "figure")),
+             list(
+               input("year_widget", "value"),
+               input("country_widget", "value"),
+               input("disease_widget", "value")
+             ),
+             function(year_selected, countries, diseases) {
+               data_transformed <- disease_count_data %>%
+                 filter((year == year_selected) &
+                          (country %in% countries) &
+                          (disease %in% diseases)) %>%
+                 drop_na(count) %>%
+                 group_by(country) %>%
+                 summarise(total_deaths = sum(count)) %>%
+                 top_n(5, total_deaths)
+               
+               fig <- ggplot(data_transformed) + 
+                 aes(x = total_deaths, 
+                     y = reorder(country, total_deaths), 
+                     fill = country) +
+                 geom_bar(stat='identity', show.legend=FALSE) +
+                 labs(x = "Number of Deaths",
+                      y = "Country")
+               
+               return(list(ggplotly(fig)))
+             })
+
+app$callback(list(output("disease_chart", "figure")),
+             list(
+               input("year_widget", "value"),
+               input("country_widget", "value"),
+               input("disease_widget", "value")
+             ),
+             function(year_selected, countries, diseases) {
+               data_transformed <- disease_count_data %>%
+                 filter((year == year_selected) &
+                          (country %in% countries) &
+                          (disease %in% diseases)) %>%
+                 drop_na(count) %>%
+                 group_by(disease) %>%
+                 summarise(total_deaths = sum(count)) %>%
+                 top_n(5, total_deaths)
+               
+               fig <- ggplot(data_transformed) + 
+                 aes(x = total_deaths, 
+                     y = reorder(disease, total_deaths), 
+                     fill = disease) +
+                 geom_bar(stat='identity', show.legend=FALSE) +
+                 labs(x = "Number of Deaths",
+                      y = "Disease")
+
+               return(list(ggplotly(fig)))
+             })
+
 
 app$callback(list(output("map", "figure")),
              list(
