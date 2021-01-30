@@ -1,6 +1,6 @@
 # dsci_532_group_24-R
 
-# Help Save African Children!
+# Care for African Kids
 
 ## Welcome!
 
@@ -42,7 +42,7 @@ The interactive and visual components of the app are entangled with each other i
 ![App sketch](app_sketch.PNG)
 
 ## Dashboard in action
-![App animation](app.gif)
+![App animation (R version)](app-R.gif)
 
 ## Link to deployed app
 
