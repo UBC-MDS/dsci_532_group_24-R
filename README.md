@@ -46,7 +46,7 @@ The interactive and visual components of the app are entangled with each other i
 
 ## Link to deployed app
 
-We hope we caught your interest by now! Please check out the [latest version](https://african-children-health-app.herokuapp.com/) of our app, courtesy of Heroku.
+We hope we caught your interest by now! Please check out the [latest version](https://african-children.herokuapp.com/) of our app, courtesy of Heroku.
 
 ## Get involved
 If you would like to help us improve our app, please check our [contributors' guidelines](CONTRIBUTING.md) !
